@@ -1,0 +1,20 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "A server side restful service for a note app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ohad Stoller",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nanoid": "^3.1.23"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
