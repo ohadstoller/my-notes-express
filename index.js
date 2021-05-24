@@ -2,8 +2,7 @@ const express = require('express')
 const app = express()
 app.use(express.json())
 
-const { nanoid } = require("nanoid");
-
+const {nanoid} = require("nanoid");
 
 
 let notes = [
@@ -32,7 +31,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/notes', (req, res) => {
-  res.json(notes)
+   res.json(notes)
 })
 
 
@@ -43,8 +42,19 @@ app.get('/api/notes/:id', (request, res) => {
 })
 
 app.post('/api/notes', (req, res) => {
-  const note = req.body
-  console.log(note)
+  const body = req.body
+  if (!body.content) {
+    return res.status(400).json({
+      error: 'content is missing'
+    })
+  }
+  const note = {
+    content: body.content,
+    importKey: body.important || false,
+    date: new Date(),
+    id: nanoid()
+  }
+  notes = notes.concat(note)
   res.json(note)
 })
 
