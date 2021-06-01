@@ -1,15 +1,16 @@
+require('dotenv').config()
 const express = require('express')
+const Note = require('./models/note')
 const {nanoid} = require("nanoid");
+
+
+
 
 const app = express()
 app.use(express.json())
 
 const cors = require('cors')
 app.use(cors())
-
-
-
-
 
 
 const requestLogger = (request, response, next) => {
@@ -47,32 +48,35 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/notes', (req, res) => {
-   res.json(notes)
+app.get('/api/notes', (request, response) => {
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
 })
 
 
-app.get('/api/notes/:id', (request, res) => {
-  const id = Number(request.params.id)
-  const note = notes.find(note => note.id === id)
-  note ? res.json(note) : res.status(404).end()
+app.get('/api/notes/:id', (request, response) => {
+  Note.findById(request.params.id).then(note => {
+    response.json(note)
+  })
 })
 
-app.post('/api/notes', (req, res) => {
-  const body = req.body
-  if (!body.content) {
-    return res.status(400).json({
-      error: 'content is missing'
-    })
+app.post('/api/notes', (request, response) => {
+  const body = request.body
+
+  if (body.content === undefined) {
+    return response.status(400).json({ error: 'content missing' })
   }
-  const note = {
+
+  const note = new Note({
     content: body.content,
-    importKey: body.important || false,
+    important: body.important || false,
     date: new Date(),
-    id: nanoid()
-  }
-  notes = notes.concat(note)
-  res.json(note)
+  })
+
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  })
 })
 
 app.delete('/api/notes/:id', (req, res) => {
@@ -87,7 +91,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
