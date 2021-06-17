@@ -4,8 +4,6 @@ const Note = require('./models/note')
 const {nanoid} = require("nanoid");
 
 
-
-
 const app = express()
 app.use(express.json())
 
@@ -65,7 +63,7 @@ app.post('/api/notes', (request, response) => {
   const body = request.body
 
   if (body.content === undefined) {
-    return response.status(400).json({ error: 'content missing' })
+    return response.status(400).json({error: 'content missing'})
   }
 
   const note = new Note({
@@ -79,14 +77,14 @@ app.post('/api/notes', (request, response) => {
   })
 })
 
-app.delete('/api/notes/:id', (req, res) => {
-  const id = Number(req.params.id)
-  notes = notes.filter(note => note.id !== id)
-  res.status(204).end()
+app.get('/api/notes/:id', (request, response) => {
+  Note.findById(request.params.id).then(note => {
+    response.json(note)
+  })
 })
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+  response.status(404).send({error: 'unknown endpoint'})
 }
 
 app.use(unknownEndpoint)
