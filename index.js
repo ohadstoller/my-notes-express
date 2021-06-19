@@ -62,6 +62,22 @@ app.get('/api/notes/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
+app.delete('/api/notes/:id', async (request, response, next) => {
+  try {
+    await Note.findByIdAndRemove(request.params.id)
+    return response.status(204).end()
+  } catch (e) {
+    next(e)
+
+  }
+
+  // Note.findByIdAndRemove(request.params.id)
+  //   .then(result => {
+  //     response.status(204).end()
+  //   })
+  //   .catch(error => next(error))
+})
+
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({error: 'unknown endpoint'})
