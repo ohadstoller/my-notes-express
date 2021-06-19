@@ -7,9 +7,10 @@ const {nanoid} = require("nanoid");
 const app = express()
 app.use(express.json())
 
+app.use(express.static('build'))
+
 const cors = require('cors')
 app.use(cors())
-
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -19,28 +20,6 @@ const requestLogger = (request, response, next) => {
   next()
 }
 app.use(requestLogger)
-
-
-let notes = [
-  {
-    id: nanoid(),
-    content: "HTML is easy",
-    date: "2019-05-30T17:30:31.098Z",
-    important: true
-  },
-  {
-    id: nanoid(),
-    content: "Browser can execute only Javascript",
-    date: "2019-05-30T18:39:34.091Z",
-    important: false
-  },
-  {
-    id: nanoid(),
-    content: "GET and POST are the most important methods of HTTP protocol",
-    date: "2019-05-30T19:20:14.298Z",
-    important: true
-  }
-]
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
@@ -52,27 +31,6 @@ app.get('/api/notes', (request, response) => {
   })
 })
 
-
-// app.get('/api/notes/:id', (request, response) => {
-//   Note.findById(request.params.id).then(note => {
-//     response.json(note)
-//   })
-// })
-
-app.get('/api/notes/:id', (request, response) => {
-  Note.findById(request.params.id)
-    .then(note => {
-      if (note) {
-        response.json(note)
-      } else {
-        response.status(404).end()
-      }
-    })
-    .catch(error => {
-      console.log(error)
-      response.status(400).send({ error: 'malformatted id' })
-    })
-})
 
 app.post('/api/notes', (request, response) => {
   const body = request.body
@@ -92,6 +50,18 @@ app.post('/api/notes', (request, response) => {
   })
 })
 
+app.get('/api/notes/:id', (request, response, next) => {
+  Note.findById(request.params.id)
+    .then(note => {
+      if (note) {
+        response.json(note)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
+})
+
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({error: 'unknown endpoint'})
@@ -103,3 +73,16 @@ const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({error: 'malformatted id'})
+  }
+
+  next(error)
+}
+
+// this has to be the last loaded middleware.
+app.use(errorHandler)
