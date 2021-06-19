@@ -65,10 +65,9 @@ app.get('/api/notes/:id', (request, response, next) => {
 app.delete('/api/notes/:id', async (request, response, next) => {
   try {
     const noteToDelete = await Note.findByIdAndRemove(request.params.id)
-    if(noteToDelete){
+    if (noteToDelete) {
       return await response.status(204).end()
-    }
-    else {
+    } else {
       response.status(404).end()
     }
 
@@ -76,12 +75,21 @@ app.delete('/api/notes/:id', async (request, response, next) => {
     return next(e)
 
   }
+})
 
-  // Note.findByIdAndRemove(request.params.id)
-  //   .then(result => {
-  //     response.status(204).end()
-  //   })
-  //   .catch(error => next(error))
+app.put('/api/notes/:id', async (request, response, next) => {
+  const body = request.body
+  const note = {
+    content: body.content,
+    important: body.important,
+  }
+  try {
+    const updatedNote = await Note.findByIdAndUpdate(request.params.id, note, {new: true})
+    response.json(updatedNote)
+  } catch (e) {
+    next(e)
+  }
+
 })
 
 
