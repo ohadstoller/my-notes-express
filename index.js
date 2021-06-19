@@ -64,10 +64,16 @@ app.get('/api/notes/:id', (request, response, next) => {
 
 app.delete('/api/notes/:id', async (request, response, next) => {
   try {
-    await Note.findByIdAndRemove(request.params.id)
-    return response.status(204).end()
+    const noteToDelete = await Note.findByIdAndRemove(request.params.id)
+    if(noteToDelete){
+      return await response.status(204).end()
+    }
+    else {
+      response.status(404).end()
+    }
+
   } catch (e) {
-    next(e)
+    return next(e)
 
   }
 
